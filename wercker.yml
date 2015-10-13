@@ -1,0 +1,30 @@
+box: posaunehm/calibre-jp
+
+build:
+  steps:
+    - script:
+        name: build gitbook
+        code: |
+          sudo gitbook pdf ./ hogebook.pdf
+          sudo gitbook epub ./ hogebook.epub
+          sudo gitbook mobi ./ hogebook.mobi
+deploy :
+  steps :
+    - script:
+        name: Configure git
+        code: |
+          git config --global user.email "posaunehm+hoge@gmail.com"
+          git config --global user.name "wercker"
+          rm -rf .git
+    - script:
+        name: setup build repository
+        code: |
+          git clone -b build --depth 1 $GH_REMOTE build
+    - script:
+        name: Deploy to github
+        code: |
+          cp ./hogebook.* ./build/
+          cd build
+          git add -A
+          git commit -m "update by wercker"
+          git push origin build
